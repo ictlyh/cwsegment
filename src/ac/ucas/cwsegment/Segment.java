@@ -14,6 +14,7 @@
 
 package ac.ucas.cwsegment;
 
+import java.util.Arrays;
 import java.util.HashMap;
 
 public class Segment {
@@ -38,11 +39,11 @@ public class Segment {
 
 	public String segment(String sentence) {
 		sentence = MyUtil.delSpace(sentence);
-		HMM hMM = new HMM(5, 25);
+		HMM hMM = new HMM(5, 26);
 		//hMM.buildPiAndMatrixA(trainFile, trainCharset);
-		hMM.buildMatrixB(trainFile, trainCharset, cwLib, cwLibCharset);
-		//hMM.readHMM("hmm.txt", "UTF-8");
-		hMM.printHMM("hmm.txt", "UTF-8");
+		//hMM.buildMatrixB(trainFile, trainCharset, cwLib, cwLibCharset);
+		hMM.readHMM("hmm.txt", "UTF-8");
+		//hMM.printHMM("hmm.txt", "UTF-8");
 		int T = sentence.length();							// 测试语句长度即为时间
 		int[] O = new int[T + 1];							// 观察序列
 		int[] q = new int[T + 1];							// 状态序列
@@ -50,7 +51,9 @@ public class Segment {
 		HashMap<Character, Integer> dict = new HashMap<Character, Integer>();
 		MyUtil.readDict(cwLib, cwLibCharset, dict);
 		MyUtil.genSequence(sentence, dict, O);
+		System.out.println("The symbol sequence is : " + Arrays.toString(O));
 		hMM.viterbi(T, O, q, pprob);
+		System.out.println("The state sequence is : " + Arrays.toString(q));
 		return MyUtil.printSegment(sentence, q);
 	}
 }

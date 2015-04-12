@@ -16,7 +16,7 @@ import ac.ucas.cwsegment.*;
 
 public class Demo {
 	public static void main(String[] args) {
-		String test = "这是  一个测试语句，测试 分词效果";
+		String test = "这是  一个训练文本，训练 分词效果";
 		Segment seg = new Segment();
 		System.out.println(seg.segment(test));
 	}

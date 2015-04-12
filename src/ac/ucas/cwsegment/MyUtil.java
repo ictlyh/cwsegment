@@ -29,6 +29,13 @@ public class MyUtil {
 	public static void genSequence(String sentence, HashMap<Character, Integer> dict, int[] O) {
 		sentence = delSpace(sentence);
 		for(int i = 0; i < sentence.length(); i++) {
+			/* 如果字库中不存在该字，从句中删除 */
+        	if(!dict.containsKey(sentence.charAt(i))) {
+        		String tmp = sentence.substring(0, i) + sentence.substring(i + 1);
+        		sentence = tmp;
+        		i--;
+        		continue;
+        	}
 			int index = dict.get(sentence.charAt(i));
 			O[i + 1] = index;
 		}
@@ -73,6 +80,8 @@ public class MyUtil {
             BufferedReader br=new BufferedReader(new InputStreamReader(new FileInputStream(file),charSet));
             String line = null;
             while ((line = br.readLine()) != null) {
+            	if(line.length() != 1)
+            		continue;
             	if(!dict.containsKey(line.charAt(0))) {
             		dict.put(line.charAt(0), dict.size() + 1);
             	}

@@ -223,12 +223,19 @@ public class HMM {
             BufferedReader br=new BufferedReader(new InputStreamReader(new FileInputStream(file),charSet));
             String line = null;
             String last = null;
+            int lineNum = 0;
             while ((line = br.readLine()) != null) {
+            	lineNum++;
             	last = null;
                 String[] words = line.split(" ");
                 for (int i = 0; i < words.length; i++) {
                 	/* 标点符号作为单字词处理  */
                     String word = words[i].trim();
+                    
+                    /*读文件时第一行行首会多一个空，需要去除 */
+                    if(lineNum == 1 && i == 0)
+                    	word = word.substring(1);
+                    
                     int length = word.length();
                     
                     if (length < 1)// 词长度为0
@@ -325,7 +332,7 @@ public class HMM {
          *  B row -> N
          *  B col -> M + 1
          */
-        long[][] count = new long[4][M + 1];
+        long[][] count = new long[N][M + 1];
         for (int row = 0; row < count.length; row++) {
         	// 加一平滑
             Arrays.fill(count[row], 1);
@@ -339,26 +346,39 @@ public class HMM {
         try {
             BufferedReader br=new BufferedReader(new InputStreamReader(new FileInputStream(file),charSet));
             String line = null;
+            int lineNum = 0;
             while ((line = br.readLine()) != null) {
+            	lineNum++;
                 String[] words = line.split(" ");
                 for (int i = 0; i < words.length; i++) {
-                    //String word = words[i].trim();
                 	String word = words[i];
-                    if (word.length() < 1)
+                	
+                	/*读文件时第一行行首会多一个空，需要处理掉 */
+                	if(lineNum == 1 && i == 0)
+                		word = word.substring(1);
+                	
+                	int length = word.length();
+                	
+                    if (length < 1)
                         continue;
-                    // "这".length() = 2 ????
-                    if (word.length() == 1) {// 词长度为1
+                    if (length == 1) {// 词长度为1
+                    	/* 如果字库中没有这个字，忽略不处理 */
+                    	if(!dict.containsKey(word.charAt(0)))
+                    		continue;
                         int index = dict.get(word.charAt(0));
                         count[3][0]++;
                         count[3][index]++;
                     } else {// 词长度大于1
-                        for (int j = 0; j < word.length(); j++) {
+                        for (int j = 0; j < length; j++) {
                         	// 获取词中的每个字
+                        	/* 如果字库中没有这个字，忽略不处理 */
+                        	if(!dict.containsKey(word.charAt(0)))
+                        		continue;
                             int index = dict.get(word.charAt(j));
                             if (j == 0) {// 词的第一个字
                                 count[0][0]++;
                                 count[0][index]++;
-                            } else if (j == word.length()-1) {// 词的最后一个字
+                            } else if (j == length-1) {// 词的最后一个字
                                 count[2][0]++;
                                 count[2][index]++;
                             } else {// 词中间的字
