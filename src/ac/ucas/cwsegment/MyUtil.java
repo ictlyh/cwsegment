@@ -59,13 +59,19 @@ public class MyUtil {
 	 * param q：状态序列
 	 * return line: 分词结果
 	 */
-	public static String printSegment(String sentence, int[] q) {
+	public static String printSegment(String sentence, int[] q, HashMap<Character, Integer> dict) {
 		String line = "";
-		for(int i = 1; i < q.length; i++) {
-			if(q[i] == 3 || q[i] == 4) {// 状态序列是E或者S
-				line += sentence.charAt(i - 1) + " ";
-			} else
-				line += sentence.charAt(i - 1);
+		int j = 1;
+		for(int i = 0; i < sentence.length(); i++) {
+			if(!dict.containsKey(sentence.charAt(i))) {
+				line += " " + sentence.charAt(i) + " ";
+			} else {
+				if(q[j] == 3 || q[j] == 4) {// 状态序列是E或者S
+					line += sentence.charAt(i) + " ";
+				} else
+					line += sentence.charAt(i);
+				j++;
+			}
 		}
 		return line;
 	}

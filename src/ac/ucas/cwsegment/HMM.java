@@ -292,22 +292,22 @@ public class HMM {
             e.printStackTrace();
         }
         
-        for (int i = 0; i < count.length; i++)
-            System.out.println(Arrays.toString(count[i]));
-        System.out.println(" ===== Pi array is: ===== ");
+        //for (int i = 0; i < count.length; i++)
+        //    System.out.println(Arrays.toString(count[i]));
+        //System.out.println(" ===== Pi array is: ===== ");
         long allWordCount = count[2][0] + count[3][0] + count[4][0];
         pi[1] = (double)count[2][0] / allWordCount;
         pi[2] = 0.0;
         pi[3] = 0.0;
         pi[4] = (double)count[3][0] / allWordCount;
         pi[5] = (double)count[4][0] / allWordCount;
-        System.out.println(Arrays.toString(pi));
-        System.out.println(" ===== A matrix is: ===== ");
+        //System.out.println(Arrays.toString(pi));
+        //System.out.println(" ===== A matrix is: ===== ");
         for (int i = 1; i <= N; i++)
             for (int j = 1; j <= N; j++)
                 A[i][j] = (double)count[i - 1][j]/ count[i - 1][0];
-        for (int i = 1; i <= N; i++)
-            System.out.println(Arrays.toString(A[i]));
+        //for (int i = 1; i <= N; i++)
+        //    System.out.println(Arrays.toString(A[i]));
 	}
 	
 	// 从训练文件构建观察符号矩阵B
@@ -372,7 +372,7 @@ public class HMM {
                         for (int j = 0; j < length; j++) {
                         	// 获取词中的每个字
                         	/* 如果字库中没有这个字，忽略不处理 */
-                        	if(!dict.containsKey(word.charAt(0)))
+                        	if(!dict.containsKey(word.charAt(j)))
                         		continue;
                             int index = dict.get(word.charAt(j));
                             if (j == 0) {// 词的第一个字
@@ -394,11 +394,11 @@ public class HMM {
             e.printStackTrace();
         }
         
-        System.out.println(" ===== count ===== ");
+        /*System.out.println(" ===== count ===== ");
         for (int i = 0; i < count.length; i++)
-            System.out.println(Arrays.toString(count[i]));
+            System.out.println(Arrays.toString(count[i]));*/
         
-        System.out.println(" ========= B matrix =========");
+        //System.out.println(" ========= B matrix =========");
         for (int i = 1; i < N + 1; i++) {
             for (int j = 1; j < M + 1; j++) {
                 B[i][j] = (double) count[i - 1][j] / count[i - 1][0];
