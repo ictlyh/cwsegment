@@ -7,7 +7,7 @@
  */
 /**
  * ClassName: MyUtil
- * Function: TODO ADD FUNCTION.
+ * Function: 辅助函数类
  * @author yhluo
  * @version 
  */
@@ -22,9 +22,9 @@ import java.util.HashMap;
 public class MyUtil {
 	
 	/* 根据测试语句得到观察序列
-	 * param sentence：测试语句，不包括空格
-	 * param dict：汉字字典(包括标点符号)
-	 * return O：观察序列
+	 * @param sentence：测试语句，不包括空格
+	 * @param dict：汉字字典(包括标点符号)
+	 * @return O：观察序列
 	 */
 	public static void genSequence(String sentence, HashMap<Character, Integer> dict, int[] O) {
 		sentence = delSpace(sentence);
@@ -42,8 +42,8 @@ public class MyUtil {
 	}
 	
 	/* 删除测试语句中的空格
-	 * param sentence： 测试语句
-	 * return ：删除空格后的语句
+	 * @param sentence： 测试语句
+	 * @return ：删除空格后的语句
 	 */
 	public static String delSpace(String sentence) {
 		String res = "";
@@ -56,10 +56,10 @@ public class MyUtil {
 	}
 	
 	/* 根据状态序列切分测试语句
-	 * param sentence： 测试语句，不包括空格
-	 * param q：状态序列
-	 * param dict: 汉字哈希表
-	 * return line: 分词结果
+	 * @param sentence： 测试语句，不包括空格
+	 * @param q：状态序列
+	 * @param dict: 汉字哈希表
+	 * @return line: 分词结果
 	 */
 	public static String printSegment(String sentence, int[] q, HashMap<Character, Integer> dict) {
 		String line = "";
@@ -79,9 +79,9 @@ public class MyUtil {
 	}
 	
 	/* 从文件中读入汉字构建汉字哈希表
-	 * param file: 汉字字典，包括标点符号
-	 * param charSet: 文件编码
-	 * return dict：汉字哈希表
+	 * @param file: 汉字字典，包括标点符号
+	 * @param charSet: 文件编码
+	 * @return dict：汉字哈希表
 	 */
 	public static void readDict(String file, String charSet, HashMap<Character, Integer> dict) {
 		try {

@@ -7,7 +7,7 @@
  */
 /**
  * ClassName: Segment
- * Function: TODO ADD FUNCTION.
+ * Function: 分词入口类
  * @author yhluo
  * @version 
  */
@@ -26,10 +26,10 @@ import java.util.Stack;
 import java.util.Calendar;
 
 public class Segment {
-	private String trainFile;
-	private String trainCharset;
-	private String cwLib;
-	private String cwLibCharset;
+	private String trainFile;		// 训练文件
+	private String trainCharset;	// 训练文件编码格式
+	private String cwLib;			// 汉字字库文件
+	private String cwLibCharset;	// 汉字字库文件编码格式
 
 	public Segment() {
 		trainFile = "lib/pku_training.utf8";
@@ -45,14 +45,21 @@ public class Segment {
 		this.cwLibCharset = "UTF-8";
 	}
 
+	/* HMM对一个句子做切分
+	 * @param sentence: 待切分句子
+	 * @return : 切分结果
+	 */
 	public String hMMSegment(String sentence) {
 		Calendar start = Calendar.getInstance();
 		sentence = MyUtil.delSpace(sentence);
 		HMM hMM = new HMM(5, 3790);
-		//hMM.buildPiAndMatrixA(trainFile, trainCharset);
-		//hMM.buildMatrixB(trainFile, trainCharset, cwLib, cwLibCharset);
+		/* 不重新构建HMM数据，如果有更好的训练文件，可以使用如下语句重新构建
+		 * hMM.buildPiAndMatrixA(trainFile, trainCharset);
+		 * hMM.buildMatrixB(trainFile, trainCharset, cwLib, cwLibCharset);
+		 * hMM.printHMM("hmm.txt", "UTF-8");
+		 */
 		hMM.readHMM("hmm.txt", "UTF-8");
-		//hMM.printHMM("hmm.txt", "UTF-8");
+		
 		int T = sentence.length();							// 测试语句长度即为时间
 		int[] O = new int[T + 1];							// 观察序列
 		int[] q = new int[T + 1];							// 状态序列
@@ -68,14 +75,18 @@ public class Segment {
 		System.out.println("Segment finished, using " + (end.getTimeInMillis() - start.getTimeInMillis()) + " millseconds");
 		return res;
 	}
-	
+	/* HMM对测试文件进行分词
+	 * @param testFile: 测试文件路径
+	 * @param testCharset: 测试文件编码格式
+	 * @param resultFile: 分词结果保存路径
+	 */
 	public void hMMSegment(String testFile, String testCharset, String resultFile) {
 		Calendar start = Calendar.getInstance();
 		/* 使用训练文件的时候每次重新构建HMM文件，而不是从HMM文件读入 */
 		HMM hMM = new HMM(5, 3790);
 		hMM.buildPiAndMatrixA(trainFile, trainCharset);
 		hMM.buildMatrixB(trainFile, trainCharset, cwLib, cwLibCharset);
-		//hMM.readHMM("hmm.txt", "UTF-8");
+		// 保存HMM数据
 		hMM.printHMM("hmm.txt", "UTF-8");
 		
 		HashMap<Character, Integer> dict = new HashMap<Character, Integer>();
@@ -102,9 +113,7 @@ public class Segment {
 				double pprob = 0.0;
 				
 				MyUtil.genSequence(sentence, dict, O);
-				//System.out.println("The symbol sequence is : " + Arrays.toString(O));
 				hMM.viterbi(T, O, q, pprob);
-				//System.out.println("The state sequence is : " + Arrays.toString(q));
 				bw.write(MyUtil.printSegment(sentence, q, dict));
 				bw.newLine();	
 			}
@@ -117,7 +126,12 @@ public class Segment {
 		System.out.println("HMM Segment finished, using " + (end.getTimeInMillis() - start.getTimeInMillis()) + " millseconds");
 	}
 	
-	public void backwardMaximiumMatchSegment(String testFile, String testCharset, String resultFile) {
+	/* 反向最大匹配分词
+	 * @param testFile: 测试文件
+	 * @param testCharset: 测试文件编码格式
+	 * @param resultFile: 分词结果保存路径
+	 */
+	public void backwardMaximumMatchSegment(String testFile, String testCharset, String resultFile) {
 		Calendar start = Calendar.getInstance();
 		HashMap<String, Integer> dict = new HashMap<String, Integer>();
 		try {

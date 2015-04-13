@@ -7,7 +7,7 @@
  */
 /**
  * ClassName: HMM
- * Function: TODO ADD FUNCTION.
+ * Function: 隐马尔可夫模型
  * @author yhluo
  * @version 
  */
@@ -43,64 +43,26 @@ public class HMM {
 		B = new double[N + 1][M + 1];
 		pi = new double[N + 1];
 	}
-	
-	public int getN() {
-		return N;
-	}
 
-	public void setN(int n) {
-		N = n;
-	}
-
-	public int getM() {
-		return M;
-	}
-
-	public void setM(int m) {
-		M = m;
-	}
-
-	public double getA(int i, int j) {
-		return A[i][j];
-	}
-
-	public void setA(double a, int i, int j) {
-		A[i][j] = a;
-	}
-
-	public double getB(int i, int j) {
-		return B[i][j];
-	}
-
-	public void setB(double b, int i, int j) {
-		B[i][j] = b;
-	}
-
-	public double pi(int i) {
-		return pi[i];
-	}
-
-	public void setPi(double pi, int i) {
-		this.pi[i] = pi;
-	}
-
-	// 从文件中读入HMM数据，即N，M，A，B，pi
-	/* HMM file format:
-	---------------------------------------------
-	N= <number of states>
-	M= <number of symbols>
-	A:
-	a11 a12 ... a1N
-	a21 a22 ... a2N
-	 .   .   .   .
-	aN1 aN2 ... aNN
-	B:
-	b11 b12 ... b1M
-	b21 b22 ... b2M
-	 .   .   .   .
-	bN1 bN2 ... bNM
-	Pi:
-	pi1 pi2 ... piN
+	/* 从文件中读入HMM数据，即N，M，A，B，pi
+	 * HMM 文件格式:
+	 * ---------------------------------------------
+	 * N= <number of states>
+	 * M= <number of symbols>
+	 * A:
+	 * a11 a12 ... a1N
+	 * a21 a22 ... a2N
+	 * aN1 aN2 ... aNN
+	 * B:
+	 * b11 b12 ... b1M
+	 * b21 b22 ... b2M
+	 * .   .   .   .
+	 * bN1 bN2 ... bNM
+	 * Pi:
+	 * pi1 pi2 ... piN
+	 *
+	 * @param file: HMM数据文件
+	 * @param charSet: 文件编码格式
 	 */
 	public void readHMM(String file, String charSet) {
 		try {
@@ -159,7 +121,10 @@ public class HMM {
 		}
 	}
 	
-	// 写HMM数据到文件
+	/* 写HMM数据到文件
+	 * @param file: HMM输出文件
+	 * @param charSet: 编码格式
+	 */
 	public void printHMM(String file, String charSet) {
 		try {
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), charSet));
@@ -202,10 +167,13 @@ public class HMM {
 		}
 	}
 	
-	// 从训练文件构建状态转移矩阵A和初始概率分布pi
+	/* 从训练文件构建状态转移矩阵A和初始概率分布pi
+	 * @param file: 训练文件
+	 * @param charSet: 编码格式
+	 */
 	public void buildPiAndMatrixA(String file, String charSet) {
 		/**
-         * count matrix:
+         * count matrix format:
          *    0   1 2 3 4 5
          *    ALL B M E S $
          * 0B *   * * * * *
@@ -213,10 +181,6 @@ public class HMM {
          * 2E *   * * * * *
          * 3S *   * * * * *
          * 4$ *	  * * * * *
-         * NOTE:
-         *  count[1][0] or count[2][0] is the total number of complex words
-         *  count[3][0] is the total number of single words
-         *  count[4][0] is the number of begin lines
          */
 		long[][] count = new long[5][N + 1];
 		try {
@@ -287,52 +251,38 @@ public class HMM {
                     }
                     last = word;
                 }
-                //System.out.println("Finish " + words.length + " words ...");
             }
             br.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        //for (int i = 0; i < count.length; i++)
-        //    System.out.println(Arrays.toString(count[i]));
-        //System.out.println(" ===== Pi array is: ===== ");
         long allWordCount = count[2][0] + count[3][0] + count[4][0];
         pi[1] = (double)count[2][0] / allWordCount;
         pi[2] = 0.0;
         pi[3] = 0.0;
         pi[4] = (double)count[3][0] / allWordCount;
         pi[5] = (double)count[4][0] / allWordCount;
-        //System.out.println(Arrays.toString(pi));
-        //System.out.println(" ===== A matrix is: ===== ");
         for (int i = 1; i <= N; i++)
             for (int j = 1; j <= N; j++)
                 A[i][j] = (double)count[i - 1][j]/ count[i - 1][0];
-        //for (int i = 1; i <= N; i++)
-        //    System.out.println(Arrays.toString(A[i]));
 	}
 	
-	// 从训练文件构建观察符号矩阵B
+	/* 从训练文件构建观察符号矩阵B
+	 * @param file: 训练文件
+	 * @param charSet: 训练文件编码格式
+	 * @param charMapFile: 汉字字库文件
+	 * @param charMapCharset: 汉字字库文件编码格式
+	 */
 	public void buildMatrixB(String file, String charSet, String charMapFile, String charMapCharset) {
 		/**
-         * Chinese Character count => M
-         * 
-         * count matrix:
+         * 汉字数目 => M
+         * count matrix format:
          *     0   1  2  3  N ...  M
          *    ALL C1 C2 C3 CN ... CM
          * 0B  *  *  *  *  *  ... *
          * 1M  *  *  *  *  *  ... *
          * 2E  *  *  *  *  *  ... *
          * 3S  *  *  *  *  *  ... *
-         * 
-         * NOTE:
-         *  count[0][0] is the total number of begin count
-         *  count[1][0] is the total number of middle count
-         *  count[2][0] is the total number of end count
-         *  count[3][0] is the total number of single cound
-         *  
-         *  B row -> N
-         *  B col -> M + 1
          */
         long[][] count = new long[N][M + 1];
         for (int row = 0; row < count.length; row++) {
@@ -397,12 +347,6 @@ public class HMM {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        /*System.out.println(" ===== count ===== ");
-        for (int i = 0; i < count.length; i++)
-            System.out.println(Arrays.toString(count[i]));*/
-        
-        //System.out.println(" ========= B matrix =========");
         for (int i = 1; i < N + 1; i++) {
             for (int j = 1; j < M + 1; j++) {
                 B[i][j] = (double) count[i - 1][j] / count[i - 1][0];
@@ -411,9 +355,9 @@ public class HMM {
 	}
 	
 	/* 前向算法求解观察序列的概率
-	 * param T: 时间
-	 * param O：观察序列
-	 * return pprob：观察序列概率
+	 * @param T: 时间
+	 * @param O：观察序列
+	 * @return pprob：观察序列概率
 	 */
 	public void forward(int T, int[] O, double pprob) {
 		int i, j;   /* 状态索引 */
@@ -442,9 +386,9 @@ public class HMM {
 	}
 	
 	/* 后向算法求解观察序列的概率
-	 * param T: 时间
-	 * param O：观察序列
-	 * return pprob：观察序列概率
+	 * @param T: 时间
+	 * @param O：观察序列
+	 * @return pprob：观察序列概率
 	 */
 	public void backward(int T, int[] O, double pprob) {
 		int i, j;   /* 状态索引 */
@@ -473,10 +417,10 @@ public class HMM {
 	}
 	
 	/* Viterbi算法求解最优状态序列
-	 * param T: 时间
-	 * param O：观察序列
-	 * return q： 状态序列
-	 * return pprob：观察序列概率
+	 * @param T: 时间
+	 * @param O：观察序列
+	 * @return q： 状态序列
+	 * @return pprob：观察序列概率
 	 */
 	public void viterbi(int T, int[] O, int[] q, double pprob) {
 		int i, j;
