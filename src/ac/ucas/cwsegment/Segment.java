@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Stack;
 
 public class Segment {
 	private String trainFile;
@@ -35,15 +36,15 @@ public class Segment {
 		cwLib = "lib/cwdict-3785.txt";
 		cwLibCharset = "UTF-8";
 	}
-	public Segment(String trainFile, String trainCharset, String cwLib, String cwLibCharset) {
+	public Segment(String trainFile, String trainCharset) {
 		super();
 		this.trainFile = trainFile;
 		this.trainCharset = trainCharset;
-		this.cwLib = cwLib;
-		this.cwLibCharset = cwLibCharset;
+		this.cwLib = "lib/cwdict-3785.txt";
+		this.cwLibCharset = "UTF-8";
 	}
 
-	public String segment(String sentence) {
+	public String hMMSegment(String sentence) {
 		sentence = MyUtil.delSpace(sentence);
 		HMM hMM = new HMM(5, 3790);
 		//hMM.buildPiAndMatrixA(trainFile, trainCharset);
@@ -63,12 +64,13 @@ public class Segment {
 		return MyUtil.printSegment(sentence, q, dict);
 	}
 	
-	public void segment(String testFile, String resultFile) {
+	public void hMMSegment(String testFile, String testCharset, String resultFile) {
 		
+		/* 使用训练文件的时候每次重新构建HMM文件，而不是从HMM文件读入 */
 		HMM hMM = new HMM(5, 3790);
-		//hMM.buildPiAndMatrixA(trainFile, trainCharset);
-		//hMM.buildMatrixB(trainFile, trainCharset, cwLib, cwLibCharset);
-		hMM.readHMM("hmm.txt", "UTF-8");
+		hMM.buildPiAndMatrixA(trainFile, trainCharset);
+		hMM.buildMatrixB(trainFile, trainCharset, cwLib, cwLibCharset);
+		//hMM.readHMM("hmm.txt", "UTF-8");
 		//hMM.printHMM("hmm.txt", "UTF-8");
 		
 		HashMap<Character, Integer> dict = new HashMap<Character, Integer>();
@@ -76,7 +78,7 @@ public class Segment {
 		String sentence = null;
 		
 		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), "UTF-8"));
+			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), testCharset));
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(resultFile), "UTF-8"));
 			String line = null;
 			while((line = br.readLine()) != null) {
@@ -100,5 +102,78 @@ public class Segment {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void backwardMaximiumMatchSegment(String testFile, String testCharset, String resultFile) {
+		HashMap<String, Integer> dict = new HashMap<String, Integer>();
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(trainFile), trainCharset));
+			String line = null;
+			while((line = br.readLine()) != null) {
+				if(line.length() != 0) {
+					if(!dict.containsKey(line)) {
+						dict.put(line, dict.size());
+					}
+				}
+			}
+			br.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		Stack<String> st_word = new Stack<String>();
+		Stack<String> st_sentence = new Stack<String>();
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), testCharset));
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(resultFile), "UTF-8"));
+			String line = null;
+			while((line = br.readLine()) != null) {
+				if(line.length() == 0) {
+					continue;
+				}
+				else if(line.length() == 1) {
+					st_word.push("\n");
+					st_word.push(line);
+				} else {
+					st_word.push("\n");
+					String last = line.substring(0);
+					while(last.length() > 0) {
+						if(last.length() == 1) {
+							st_word.push(last);
+							break;
+						} else {
+							for(int i = 0; i < last.length(); i++) {
+								String seg = last.substring(i);
+								if(seg.length() == 1 || dict.containsKey(seg)) {
+									st_word.push(seg);
+									last = last.substring(0, i);
+									break;
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			line = "";
+			while(!st_word.empty()) {
+				String tmp = st_word.pop();
+				if(tmp.equals("\n")) {
+					st_sentence.push(line);
+					line = "";
+				} else {
+					line = line + tmp + " "; 
+				}
+			}
+			while(!st_sentence.empty()) {
+				bw.write(st_sentence.pop());
+				bw.newLine();
+			}
+			br.close();
+			bw.close();
+		}  catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 }
