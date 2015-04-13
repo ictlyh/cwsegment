@@ -40,6 +40,7 @@ public class MyUtil {
 			O[i + 1] = index;
 		}
 	}
+	
 	/* 删除测试语句中的空格
 	 * param sentence： 测试语句
 	 * return ：删除空格后的语句
@@ -57,6 +58,7 @@ public class MyUtil {
 	/* 根据状态序列切分测试语句
 	 * param sentence： 测试语句，不包括空格
 	 * param q：状态序列
+	 * param dict: 汉字哈希表
 	 * return line: 分词结果
 	 */
 	public static String printSegment(String sentence, int[] q, HashMap<Character, Integer> dict) {
@@ -86,8 +88,15 @@ public class MyUtil {
             BufferedReader br=new BufferedReader(new InputStreamReader(new FileInputStream(file),charSet));
             String line = null;
             while ((line = br.readLine()) != null) {
-            	if(line.length() != 1)
+            	/* UTF8文件BOM处理 */
+            	if(line.length() > 0) {
+            		if((int)line.charAt(0) == 65279) {
+            			line = line.substring(1);
+            		}
+            	}
+            	if(line.length() == 0) {// 空行
             		continue;
+            	}
             	if(!dict.containsKey(line.charAt(0))) {
             		dict.put(line.charAt(0), dict.size() + 1);
             	}

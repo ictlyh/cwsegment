@@ -223,19 +223,21 @@ public class HMM {
             BufferedReader br=new BufferedReader(new InputStreamReader(new FileInputStream(file),charSet));
             String line = null;
             String last = null;
-            int lineNum = 0;
             while ((line = br.readLine()) != null) {
-            	lineNum++;
+            	/* UTF8文件BOM处理 */
+            	if(line.length() > 0) {
+            		if((int)line.charAt(0) == 65279) {
+            			line = line.substring(1);
+            		}
+            	}
+            	if(line.length() == 0) {// 空行
+            		continue;
+            	}
             	last = null;
                 String[] words = line.split(" ");
                 for (int i = 0; i < words.length; i++) {
                 	/* 标点符号作为单字词处理  */
                     String word = words[i].trim();
-                    
-                    /*读文件时第一行行首会多一个空，需要去除 */
-                    if(lineNum == 1 && i == 0)
-                    	word = word.substring(1);
-                    
                     int length = word.length();
                     
                     if (length < 1)// 词长度为0
@@ -346,17 +348,19 @@ public class HMM {
         try {
             BufferedReader br=new BufferedReader(new InputStreamReader(new FileInputStream(file),charSet));
             String line = null;
-            int lineNum = 0;
             while ((line = br.readLine()) != null) {
-            	lineNum++;
+            	/* UTF8文件BOM处理 */
+            	if(line.length() > 0) {
+            		if((int)line.charAt(0) == 65279) {
+            			line = line.substring(1);
+            		}
+            	}
+            	if(line.length() == 0) {// 空行
+            		continue;
+            	}
                 String[] words = line.split(" ");
                 for (int i = 0; i < words.length; i++) {
                 	String word = words[i];
-                	
-                	/*读文件时第一行行首会多一个空，需要处理掉 */
-                	if(lineNum == 1 && i == 0)
-                		word = word.substring(1);
-                	
                 	int length = word.length();
                 	
                     if (length < 1)

@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Stack;
+import java.util.Calendar;
 
 public class Segment {
 	private String trainFile;
@@ -45,6 +46,7 @@ public class Segment {
 	}
 
 	public String hMMSegment(String sentence) {
+		Calendar start = Calendar.getInstance();
 		sentence = MyUtil.delSpace(sentence);
 		HMM hMM = new HMM(5, 3790);
 		//hMM.buildPiAndMatrixA(trainFile, trainCharset);
@@ -57,21 +59,24 @@ public class Segment {
 		double pprob = 0.0;
 		HashMap<Character, Integer> dict = new HashMap<Character, Integer>();
 		MyUtil.readDict(cwLib, cwLibCharset, dict);
-		MyUtil.genSequence(sentence, dict, O);
-		System.out.println("The symbol sequence is : " + Arrays.toString(O));
+		MyUtil.genSequence(sentence, dict, O);		
 		hMM.viterbi(T, O, q, pprob);
+		String res = MyUtil.printSegment(sentence, q, dict);
+		Calendar end = Calendar.getInstance();
+		System.out.println("The symbol sequence is : " + Arrays.toString(O));
 		System.out.println("The state sequence is : " + Arrays.toString(q));
-		return MyUtil.printSegment(sentence, q, dict);
+		System.out.println("Segment finished, using " + (end.getTimeInMillis() - start.getTimeInMillis()) + " millseconds");
+		return res;
 	}
 	
 	public void hMMSegment(String testFile, String testCharset, String resultFile) {
-		
+		Calendar start = Calendar.getInstance();
 		/* 使用训练文件的时候每次重新构建HMM文件，而不是从HMM文件读入 */
 		HMM hMM = new HMM(5, 3790);
 		hMM.buildPiAndMatrixA(trainFile, trainCharset);
 		hMM.buildMatrixB(trainFile, trainCharset, cwLib, cwLibCharset);
 		//hMM.readHMM("hmm.txt", "UTF-8");
-		//hMM.printHMM("hmm.txt", "UTF-8");
+		hMM.printHMM("hmm.txt", "UTF-8");
 		
 		HashMap<Character, Integer> dict = new HashMap<Character, Integer>();
 		MyUtil.readDict(cwLib, cwLibCharset, dict);
@@ -82,6 +87,12 @@ public class Segment {
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(resultFile), "UTF-8"));
 			String line = null;
 			while((line = br.readLine()) != null) {
+				/* UTF8文件BOM处理 */
+            	if(line.length() > 1) {
+            		if((int)line.charAt(0) == 65279) {
+            			line = line.substring(1);
+            		}
+            	}
 				sentence = MyUtil.delSpace(line);
 				if(sentence.length() == 0)
 					continue;
@@ -102,18 +113,28 @@ public class Segment {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		Calendar end = Calendar.getInstance();
+		System.out.println("HMM Segment finished, using " + (end.getTimeInMillis() - start.getTimeInMillis()) + " millseconds");
 	}
 	
 	public void backwardMaximiumMatchSegment(String testFile, String testCharset, String resultFile) {
+		Calendar start = Calendar.getInstance();
 		HashMap<String, Integer> dict = new HashMap<String, Integer>();
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(trainFile), trainCharset));
 			String line = null;
 			while((line = br.readLine()) != null) {
-				if(line.length() != 0) {
-					if(!dict.containsKey(line)) {
-						dict.put(line, dict.size());
-					}
+				/* UTF8文件BOM处理 */
+            	if(line.length() > 0) {
+            		if((int)line.charAt(0) == 65279) {
+            			line = line.substring(1);
+            		}
+            	}
+				if(line.length() == 0) {// 空行
+					continue;
+				}
+				if(!dict.containsKey(line)) {
+					dict.put(line, dict.size());
 				}
 			}
 			br.close();
@@ -128,13 +149,18 @@ public class Segment {
 			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(resultFile), "UTF-8"));
 			String line = null;
 			while((line = br.readLine()) != null) {
-				if(line.length() == 0) {
+				/* UTF8文件BOM处理 */
+            	if(line.length() > 0) {
+            		if((int)line.charAt(0) == 65279) {
+            			line = line.substring(1);
+            		}
+            	}
+				if(line.length() == 0) {// 空行
 					continue;
-				}
-				else if(line.length() == 1) {
+				} else if(line.length() == 1) {// 单字行
 					st_word.push("\n");
 					st_word.push(line);
-				} else {
+				} else {// 多字行
 					st_word.push("\n");
 					String last = line.substring(0);
 					while(last.length() > 0) {
@@ -174,6 +200,7 @@ public class Segment {
 		}  catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+		Calendar end = Calendar.getInstance();
+		System.out.println("BWM Segment finished, using " + (end.getTimeInMillis() - start.getTimeInMillis()) + " millseconds");
 	}
 }
