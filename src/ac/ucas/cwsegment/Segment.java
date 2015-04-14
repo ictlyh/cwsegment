@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Stack;
 import java.util.Calendar;
 
@@ -178,10 +179,10 @@ public class Segment {
 					st_word.push("\n");
 					String last = line.substring(0);
 					while(last.length() > 0) {
-						if(last.length() == 1) {
+						if(last.length() == 1) {// 单字词，直接压入
 							st_word.push(last);
 							break;
-						} else {
+						} else {// 多字，逐渐减小串长度找最大匹配子串
 							for(int i = 0; i < last.length(); i++) {
 								String seg = last.substring(i);
 								if(seg.length() == 1 || dict.containsKey(seg)) {
@@ -216,5 +217,93 @@ public class Segment {
 		}
 		Calendar end = Calendar.getInstance();
 		System.out.println("BWM Segment finished, using " + (end.getTimeInMillis() - start.getTimeInMillis()) + " millseconds");
+	}
+	
+	/* 正向最大匹配分词
+	 * @param testFile: 测试文件
+	 * @param testCharset: 测试文件编码格式
+	 * @param resultFile: 分词结果保存路径
+	 */
+	public void forwardMaximumMatchSegment(String testFile, String testCharset, String resultFile) {
+		Calendar start = Calendar.getInstance();
+		HashMap<String, Integer> dict = new HashMap<String, Integer>();
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(trainFile), trainCharset));
+			String line = null;
+			while((line = br.readLine()) != null) {
+				/* UTF8文件BOM处理 */
+            	if(line.length() > 0) {
+            		if((int)line.charAt(0) == 65279) {
+            			line = line.substring(1);
+            		}
+            	}
+				if(line.length() == 0) {// 空行
+					continue;
+				}
+				if(!dict.containsKey(line)) {
+					dict.put(line, dict.size());
+				}
+			}
+			br.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		LinkedList<String> ll_word = new LinkedList<String>();
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(testFile), testCharset));
+			BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(resultFile), "UTF-8"));
+			String line = null;
+			while((line = br.readLine()) != null) {
+				/* UTF8文件BOM处理 */
+            	if(line.length() > 0) {
+            		if((int)line.charAt(0) == 65279) {
+            			line = line.substring(1);
+            		}
+            	}
+				if(line.length() == 0) {// 空行
+					continue;
+				} else if(line.length() == 1) {// 单字行
+					ll_word.add(line);
+					ll_word.add("\n");
+				} else {// 多字行
+					String last = line.substring(0);
+					while(last.length() > 0) {
+						if(last.length() == 1) {// 单字词
+							ll_word.add(last);
+							break;
+						} else {// 多字，逐渐减小串长度查找最大匹配子串
+							for(int i = last.length(); i > 0; i--) {
+								String seg = last.substring(0, i);
+								if(dict.containsKey(seg) || i == 1) {
+									ll_word.add(seg);
+									last = last.substring(i);
+									break;
+								}
+							}
+						}
+					}
+					ll_word.add("\n");
+				}
+			}
+			
+			line = "";
+			while(ll_word.size() != 0) {
+				String tmp = ll_word.poll();
+				if(tmp.equals("\n")) {
+					bw.write(line);
+					bw.newLine();
+					line = "";
+				} else {
+					line = line + tmp + " "; 
+				}
+			}
+			br.close();
+			bw.close();
+		}  catch (Exception e) {
+			e.printStackTrace();
+		}
+		Calendar end = Calendar.getInstance();
+		System.out.println("FWM Segment finished, using " + (end.getTimeInMillis() - start.getTimeInMillis()) + " millseconds");
 	}
 }

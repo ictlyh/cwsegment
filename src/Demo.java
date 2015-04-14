@@ -29,5 +29,10 @@ public class Demo {
 		Segment seg = new Segment("lib/pku_training_words.utf8", "UTF-8");
 		seg.backwardMaximumMatchSegment("lib/pku_test.utf8", "UTF-8", "bw_result.txt");
 		System.out.println("Finished");
+		
+		// 正向最大匹配文件测试
+		/*Segment seg = new Segment("lib/pku_training_words.utf8", "UTF-8");
+		seg.forwardMaximumMatchSegment("lib/pku_test.utf8", "UTF-8", "fw_result.txt");
+		System.out.println("Finished");*/
 	}
 }
