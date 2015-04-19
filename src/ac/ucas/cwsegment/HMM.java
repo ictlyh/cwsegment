@@ -174,15 +174,14 @@ public class HMM {
 	public void buildPiAndMatrixA(String file, String charSet) {
 		/**
          * count matrix format:
-         *    0   1 2 3 4 5
-         *    ALL B M E S $
-         * 0B *   * * * * *
-         * 1M *   * * * * *
-         * 2E *   * * * * *
-         * 3S *   * * * * *
-         * 4$ *	  * * * * *
+         *    0   1 2 3 4
+         *    ALL B M E S
+         * 0B *   * * * *
+         * 1M *   * * * *
+         * 2E *   * * * *
+         * 3S *   * * * *
          */
-		long[][] count = new long[5][N + 1];
+		long[][] count = new long[4][N + 1];
 		try {
             BufferedReader br=new BufferedReader(new InputStreamReader(new FileInputStream(file),charSet));
             String line = null;
@@ -213,13 +212,13 @@ public class HMM {
                                 count[3][4]++;
                             else					// ES模式
                                 count[2][4]++;
-                        } else {// 第一个词
+                        }/* else {// 第一个词
                         	count[4][0]++;
                         	count[4][4]++;			// $S模式
                         }
                         if(i == words.length - 1) {// 最后一个词
                         	count[3][5]++;			// S$模式
-                        }
+                        }*/
                     } else {// 词长度大于1
                         count[2][0]++;				// E自增
                         count[0][0]++;				// B自增
@@ -240,14 +239,14 @@ public class HMM {
                             } else {
                                 count[2][1]++;		// EB模式
                             }
-                        } else {// 第一个词
+                        } /*else {// 第一个词
                         	count[4][0]++;
                         	count[4][1]++;			// $B模式
                         }
                         
                         if(i == words.length - 1) {// 最后一个词
                         	count[2][5]++;			// E$模式
-                        }
+                        }*/
                     }
                     last = word;
                 }
@@ -256,12 +255,11 @@ public class HMM {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        long allWordCount = count[2][0] + count[3][0] + count[4][0];
+        long allWordCount = count[2][0] + count[3][0];
         pi[1] = (double)count[2][0] / allWordCount;
         pi[2] = 0.0;
         pi[3] = 0.0;
         pi[4] = (double)count[3][0] / allWordCount;
-        pi[5] = (double)count[4][0] / allWordCount;
         for (int i = 1; i <= N; i++)
             for (int j = 1; j <= N; j++)
                 A[i][j] = (double)count[i - 1][j]/ count[i - 1][0];

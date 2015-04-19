@@ -59,7 +59,7 @@ public class Segment {
 		 * hMM.buildMatrixB(trainFile, trainCharset, cwLib, cwLibCharset);
 		 * hMM.printHMM("hmm.utf8", "UTF-8");
 		 */
-		hMM.readHMM("hmm.utf8", "UTF-8");
+		hMM.readHMM("hmm_5state.utf8", "UTF-8");
 		
 		int T = sentence.length();							// 测试语句长度即为时间
 		int[] O = new int[T + 1];							// 观察序列
@@ -84,11 +84,11 @@ public class Segment {
 	public void hMMSegment(String testFile, String testCharset, String resultFile) {
 		Calendar start = Calendar.getInstance();
 		/* 使用训练文件的时候每次重新构建HMM文件，而不是从HMM文件读入 */
-		HMM hMM = new HMM(5, 3790);
+		HMM hMM = new HMM(4, 3790);
 		hMM.buildPiAndMatrixA(trainFile, trainCharset);
 		hMM.buildMatrixB(trainFile, trainCharset, cwLib, cwLibCharset);
 		// 保存HMM数据
-		hMM.printHMM("hmm.utf8", "UTF-8");
+		hMM.printHMM("hmm_4state.utf8", "UTF-8");
 		
 		HashMap<Character, Integer> dict = new HashMap<Character, Integer>();
 		MyUtil.readDict(cwLib, cwLibCharset, dict);
