@@ -35,14 +35,14 @@ public class Segment {
 	public Segment() {
 		trainFile = "lib/pku_training.utf8";
 		trainCharset = "UTF-8";
-		cwLib = "lib/cwdict-3785.txt";
+		cwLib = "lib/cwdict-3785.utf8";
 		cwLibCharset = "UTF-8";
 	}
 	public Segment(String trainFile, String trainCharset) {
 		super();
 		this.trainFile = trainFile;
 		this.trainCharset = trainCharset;
-		this.cwLib = "lib/cwdict-3785.txt";
+		this.cwLib = "lib/cwdict-3785.utf8";
 		this.cwLibCharset = "UTF-8";
 	}
 
@@ -57,9 +57,9 @@ public class Segment {
 		/* 不重新构建HMM数据，如果有更好的训练文件，可以使用如下语句重新构建
 		 * hMM.buildPiAndMatrixA(trainFile, trainCharset);
 		 * hMM.buildMatrixB(trainFile, trainCharset, cwLib, cwLibCharset);
-		 * hMM.printHMM("hmm.txt", "UTF-8");
+		 * hMM.printHMM("hmm.utf8", "UTF-8");
 		 */
-		hMM.readHMM("hmm.txt", "UTF-8");
+		hMM.readHMM("hmm.utf8", "UTF-8");
 		
 		int T = sentence.length();							// 测试语句长度即为时间
 		int[] O = new int[T + 1];							// 观察序列
@@ -88,7 +88,7 @@ public class Segment {
 		hMM.buildPiAndMatrixA(trainFile, trainCharset);
 		hMM.buildMatrixB(trainFile, trainCharset, cwLib, cwLibCharset);
 		// 保存HMM数据
-		hMM.printHMM("hmm.txt", "UTF-8");
+		hMM.printHMM("hmm.utf8", "UTF-8");
 		
 		HashMap<Character, Integer> dict = new HashMap<Character, Integer>();
 		MyUtil.readDict(cwLib, cwLibCharset, dict);
